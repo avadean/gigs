@@ -8,82 +8,76 @@ from pathlib import Path
 from pickle import dump as pickle_save, load as pickle_load
 from shutil import copy as shutil_copy, move as shutil_move
 
+
+PEOPLE_FILE = 'people.bin'
 DATA_FILE = 'save.bin'
 BACKUP_DIR = 'backup_saves/'
 
 
-# Add people here.
-ava = Person('Ava')
-alex = Person('Alex')
-jake = Person('Jake')
-jake_dad = Person('Jake dad')
-ebony = Person('Ebony')
-siobhan = Person('Siobhan')
-josh = Person('Josh')
-milo = Person('Milo')
-milo_sister = Person('Milo sister')
-tom = Person('Tom')
-lewis = Person('Lewis')
-kate = Person('Kate')
-dan = Person('Dan')
-preston = Person('Preston')
-sophie = Person('Sophie')
+class People:
+    def __init__(self, people):
+        assert isinstance(people, dict)
+        assert all(isinstance(key, str) for key in people.keys())
+        assert all(isinstance(value, Person) for value in people.values())
+
+        for key, value in people.items():
+            setattr(self, key, value)
 
 
-def get_example_schedule():
+def get_example_schedule(people):
 
     # Some initial gigs to create a schedule.
     gigs = [
         Gig('Foo Fighters',
             year=2024, month=6, day=13,
-            tickets=[Ticket(ava, buyer=tom),
-                     Ticket(alex, buyer=tom),
-                     Ticket(tom),
-                     Ticket(jake),
-                     Ticket(jake_dad),
-                     Ticket(milo),
-                     Ticket(milo_sister)]),
+            tickets=[Ticket(people.ava, buyer=people.tom),
+                     Ticket(people.alex, buyer=people.tom),
+                     Ticket(people.tom),
+                     Ticket(people.jake),
+                     Ticket(people.jake_dad),
+                     Ticket(people.milo),
+                     Ticket(people.milo_sister)]),
 
         Gig('Download Festival',
             year=2024, month=6, day=16,
-            tickets=[Ticket(ava),
-                     Ticket(alex, buyer=ava),
-                     Ticket(jake, buyer=ava),
-                     Ticket(siobhan, buyer=ava)]),
+            tickets=[Ticket(people.ava),
+                     Ticket(people.alex, buyer=people.ava),
+                     Ticket(people.jake, buyer=people.ava),
+                     Ticket(people.siobhan, buyer=people.ava)]),
 
         Gig('Green Day',
             year=2024, month=6, day=21,
-            tickets=[Ticket(ava, buyer=alex),
-                     Ticket(alex),
-                     Ticket(jake, buyer=alex)]),
+            tickets=[Ticket(people.ava, buyer=people.alex),
+                     Ticket(people.alex),
+                     Ticket(people.jake, buyer=people.alex)]),
 
         Gig('Leeds Festival',
             year=2024, month=8, day=24,
-            tickets=[Ticket(ava),
-                     Ticket(alex, buyer=ava),
-                     Ticket(tom),
-                     Ticket(siobhan),
-                     Ticket(jake, buyer=siobhan),
-                     Ticket(milo)]),
+            tickets=[Ticket(people.ava),
+                     Ticket(people.alex, buyer=people.ava),
+                     Ticket(people.tom),
+                     Ticket(people.siobhan),
+                     Ticket(people.jake, buyer=people.siobhan),
+                     Ticket(people.milo)]),
 
         Gig('Slipknot',
             year=2024, month=12, day=17,
-            tickets=[Ticket(ava),
-                     Ticket(alex, buyer=ava),
-                     Ticket(jake),
-                     Ticket(lewis, buyer=jake),
-                     Ticket(josh),
-                     Ticket(siobhan, buyer=josh)]),
+            tickets=[Ticket(people.ava),
+                     Ticket(people.alex, buyer=people.ava),
+                     Ticket(people.jake),
+                     Ticket(people.lewis, buyer=people.jake),
+                     Ticket(people.josh),
+                     Ticket(people.siobhan, buyer=people.josh)]),
 
         Gig('Olivia Rodrigo',
-            tickets=[Ticket(ava)]),
+            tickets=[Ticket(people.ava)]),
 
         Gig('Four Year Strong',
             year=2025, month=2, day=19,
-            tickets=[Ticket(ava),
-                     Ticket(tom, buyer=ava),
-                     Ticket(jake),
-                     Ticket(alex, buyer=jake)])
+            tickets=[Ticket(people.ava),
+                     Ticket(people.tom, buyer=people.ava),
+                     Ticket(people.jake),
+                     Ticket(people.alex, buyer=people.jake)])
     ]
 
 
@@ -91,24 +85,35 @@ def get_example_schedule():
     return Schedule(gigs)
 
 
-def load_schedule(file=DATA_FILE, strict=False):
+def load_people(file=PEOPLE_FILE):
+    with open(PEOPLE_FILE, 'rb') as people_file:
+        people = pickle_load(people_file)
+
+    return people
+
+
+def load_info(file=DATA_FILE, strict=False):
 
     if Path(file).exists():
         with open(file, 'rb') as data_file:
-            schedule = pickle_load(data_file)
-
-        return schedule
+            schedule, people = pickle_load(data_file)
 
     elif not strict:
-        return get_example_schedule()
+        people = load_people()
+        schedule = get_example_schedule(people)
 
     else:
         raise FileNotFoundError(f'Could not find file {file}.')
 
+    return schedule, people
 
-def save_schedule(schedule, file=DATA_FILE, verbose=False):
+
+def save_info(schedule, people, file=DATA_FILE, verbose=False):
+    assert isinstance(schedule, Schedule)
+    assert isinstance(people, People)
+
     if verbose:
-        print(f'Saving schedule to {file}.')
+        print(f'Saving info to {file}.')
 
     if Path(file).exists():
         data_file_backup = file + '.bak'
@@ -127,9 +132,11 @@ def save_schedule(schedule, file=DATA_FILE, verbose=False):
         shutil_copy(file, data_file_backup)
 
     with open(file, 'wb') as data_file:
-        pickle_save(schedule, data_file)
+        pickle_save((schedule, people), data_file)
 
 
 if __name__ == '__main__':
-    save_schedule(get_example_schedule)
+
+    # Usually only run data as main when wanting to manually edit saved versions of people.
+    people = load_people()
 

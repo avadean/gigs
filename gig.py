@@ -17,7 +17,10 @@ class Gig:
 
         self._name = name
         self._date = get_date(year, month, day, date)
-        self._tickets = tickets
+        self._tickets = []
+
+        for ticket in tickets:
+            self.add_ticket(ticket)
 
     def get_ticket(self, person):
         assert isinstance(person, Person)
@@ -66,13 +69,13 @@ class Gig:
 
         name_output = '       *dummy*       ' if not self._name else f'{self._name:^21}'
 
-        output += date_output + name_output + ' -> '
+        output += date_output + name_output
 
         attendees = [ticket.attendee() for ticket in self._tickets]
+        attendees_output = ''
 
-        if not attendees:
-            attendees_output = '*no attendees*'
-        else:
+        if attendees:
+            attendees_output += ' -> '
             attendees = sorted([attendee.name() for attendee in attendees])
             num_attendees = len(attendees)
 
@@ -80,9 +83,9 @@ class Gig:
             #attendees_split = [attendees[n:n+num_per_line] for n in range(num_attendees // num_per_line)] + [attendees[-(num_attendees % num_per_line):]]
             #attendees_split_max = max(max(len(att) for att in lst) for lst in attendees_split)
             #attendees_string = '{:' + str(attendees_split_max) + '}        '
-            #attendees_output = ('\n' + (' ' * len(output))).join([(attendees_string * len(split)).format(*split) for split in attendees_split])
+            #attendees_output += ('\n' + (' ' * len(output))).join([(attendees_string * len(split)).format(*split) for split in attendees_split])
 
-            attendees_output = f'{num_attendees} {"person" if num_attendees == 1 else "people"} : ' + ' - '.join(attendees)
+            attendees_output += f'{num_attendees:>2} {"person" if num_attendees == 1 else "people"} : ' + ' - '.join(attendees)
 
         output += attendees_output
 
