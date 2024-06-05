@@ -1,4 +1,5 @@
 from gig import Gig
+from utils import get_date
 
 
 class Schedule:
@@ -14,29 +15,59 @@ class Schedule:
     def add_gig(self, gig):
         assert isinstance(gig, Gig)
 
+        upcoming_gigs, passed_gigs, no_date_gigs = self._organise_gigs()
+
+        if gig.date() is None:
+            # We're trying to add a gig with no date, so only check no_date_gigs.
+
+            for other_gig in no_date_gigs:
+                if other_gig.name() == gig.name():
+                    raise ValueError('Trying to add a no date gig that already exists.')
+
+        else:
+            # We've been given a specific date, so be more strict with equality checks.
+
+            for other_gig in upcoming_gigs:
+                if (other_gig.name() == gig.name()) and (other_gig.date() == gig.date()):
+                    raise ValueError('Trying to add upcoming gig that already exists.')
+
+            for other_gig in passed_gigs:
+                if (other_gig.name() == gig.name()) and (other_gig.date() == gig.date()):
+                    raise ValueError('Trying to add passed gig that already exists.')
+
         self._gigs.append(gig)
 
-    def get_gig(self, gig_name, gig_type='any'):
+    def remove_gig(self, gig):
+        assert isinstance(gig, Gig)
+
+        self._gigs.remove(gig)
+
+    def get_gig(self, gig_name, year=None, month=None, day=None, date=None):
         assert isinstance(gig_name, str)
-        assert isinstance(gig_type, str)
-        assert gig_type in ('any', 'upcoming', 'passed', 'none')
+
+        # If a specific date is asked for then the equalities will be strict.
+        # Otherwise (i.e all of year, month, day, date are None) the equalities will only check the names of gigs.
+        gig_date = get_date(year, month, day, date)
 
         upcoming_gigs, passed_gigs, no_date_gigs = self._organise_gigs()
 
-        if gig_type in ('any', 'upcoming'):
-            for other_gig in upcoming_gigs:
-                if other_gig.name() == gig_name:
-                    return other_gig
+        if gig_date is None:
+            # If no gig date, then look at no_date_gigs first.
 
-        if gig_type in ('any', 'passed'):
-            for other_gig in passed_gigs:
-                if other_gig.name() == gig_name:
-                    return other_gig
-
-        if gig_type in ('any', 'none'):
             for other_gig in no_date_gigs:
                 if other_gig.name() == gig_name:
                     return other_gig
+
+
+        # Either no date given or a no date gig was not found, so keep checking - upcoming gigs first then passed.
+
+        for other_gig in upcoming_gigs:
+            if (other_gig.name() == gig_name) and (gig_date is None or (other_gig.date() == gig_date)):
+                return other_gig
+
+        for other_gig in passed_gigs:
+            if (other_gig.name() == gig_name) and (gig_date is None or (other_gig.date() == gig_date)):
+                return other_gig
 
         raise ValueError(f'Could not find gig with name {gig_name}.')
 

@@ -6,7 +6,7 @@ from datetime import datetime
 
 
 class Gig:
-    def __init__(self, name='', year=None, month=None, day=None, date=None, tickets=None):
+    def __init__(self, name, year=None, month=None, day=None, date=None, tickets=None):
         assert isinstance(name, str)
 
         if tickets is None:
