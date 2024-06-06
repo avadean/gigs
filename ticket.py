@@ -31,6 +31,17 @@ class Ticket:
     def settled_up(self):
         return self._settled_up
 
+    def _key(self):
+        return (self._attendee, self._buyer, self._settled_up)
+
+    def __hash(self):
+        return hash(self._key())
+
+    def __eq__(self, other):
+        assert isinstance(other, Ticket)
+
+        return self._key() == other._key()
+
     def __str__(self):
         output = f'TICKET ->\n  Attendee: {self._attendee}'
 

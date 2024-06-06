@@ -44,6 +44,38 @@ class Gig:
 
         self._tickets.remove(ticket)
 
+    def ticket_summary(self):
+
+        if not self._tickets:
+            raise ValueError('No tickets allocated to this gig.')
+
+        buyers = list({ticket.buyer() for ticket in self._tickets})
+        num_buyers = len(buyers)
+
+        attendees = [ticket.attendee() for ticket in self._tickets]
+        num_attendees = len(attendees)
+
+        output = ''
+
+        # Create a dictionary where each buyer has a list of the attendees they've bought tickets for (including themself if so).
+        buyer_to_attendee = {buyer: [ticket.attendee() for ticket in self._tickets if ticket.buyer() == buyer] for buyer in buyers}
+
+        # Reorder the attendees to place the buyer at the front for printing convenience later.
+        buyer_to_attendee = {buyer: sorted(attendees_of_this_buyer,
+                                           key=lambda attendee: (attendee != buyer, attendee.name())) for buyer, attendees_of_this_buyer in buyer_to_attendee.items()}
+
+        for buyer, attendees_of_this_buyer in buyer_to_attendee.items():
+            output += ('{:^' + str(max(len(str(buyer)) for buyer in buyers) + 2) + '} has bought tickets for : ').format(str(buyer))
+            output += ' - '.join(map(str, attendees_of_this_buyer))
+            output += '\n'
+
+        output += '\n'
+
+        if not self.all_settled_up():
+            output += 'Settle ups needed ->'
+
+        return output
+
     def update_date(self, year=None, month=None, day=None, date=None):
         self._date = get_date(year, month, day, date)
 
@@ -66,6 +98,17 @@ class Gig:
     def date(self):
         return self._date
 
+
+    def _key(self):
+        return (self._name, self._date, self._tickets)
+
+    def __hash(self):
+        return hash(self._key())
+
+    def __eq__(self, other):
+        assert isinstance(other, Gig)
+
+        return self._key() == other._key()
 
     def __str__(self):
         output = '! ' if not self.all_settled_up() else '  '

@@ -3,6 +3,8 @@ from utils import get_date
 
 
 class Schedule:
+    current_iter = -1
+
     def __init__(self, gigs=None):
         if gigs is None:
             gigs = []
@@ -85,6 +87,15 @@ class Schedule:
         no_date_gigs = sorted([gig for gig in self._gigs if gig.date() is None], key=lambda gig: gig.name())
 
         return upcoming_gigs, passed_gigs, no_date_gigs
+
+    def __iter__(self):
+        for gig in self._gigs:
+            yield gig
+
+    def __in__(self, gig):
+        assert isinstance(gig, Gig)
+
+        return gig in self._gigs
 
     def __str__(self):
         if not self._gigs:

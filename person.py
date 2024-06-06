@@ -8,11 +8,20 @@ class Person:
     def name(self):
         return self._name
 
+    def _key(self):
+        return (self._name,)
+
     def __eq__(self, other):
         assert isinstance(other, Person)
 
-        return self._name == other._name
+        return self._key() == other._key()
+
+    def __str__(self):
+        return self._name
 
     def __repr__(self):
-        return self._name
+        return self.__str__()
+
+    def __hash__(self):
+        return hash(self._key())
 
