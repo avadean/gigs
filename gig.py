@@ -44,6 +44,12 @@ class Gig:
 
         self._tickets.remove(ticket)
 
+    def update_date(self, year=None, month=None, day=None, date=None):
+        self._date = get_date(year, month, day, date)
+
+    def remove_date(self):
+        self._date = None
+
 
     def is_upcoming(self):
         return (self._date is not None) and (datetime.now() < self._date)

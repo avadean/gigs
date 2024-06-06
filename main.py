@@ -3,6 +3,7 @@ from gig import Gig
 from person import Person
 from ticket import Ticket
 
+
 # Load in all information - including schedule, people, etc.
 # If a saved version exists, it will be loaded. If not, an example version will be created to get started.
 schedule, people = load_info()
