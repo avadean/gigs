@@ -2,18 +2,27 @@ from person import Person
 
 
 class Ticket:
-    def __init__(self, attendee, buyer=None, settled_up=True):
+    def __init__(self, attendee, buyer=None, price=None, settled_up=True):
         assert isinstance(attendee, Person)
 
         if buyer is None:
             buyer = attendee
 
         assert isinstance(buyer, Person)
+
+        if price is not None:
+            assert isinstance(price, (float, int))
+
+            price = float(price)
+
+            assert price >= 0.0
+
         assert isinstance(settled_up, bool)
         assert not (buyer == attendee and not settled_up)
 
         self._attendee = attendee
         self._buyer = buyer
+        self._price = price
         self._settled_up = settled_up
 
     def attendee(self):
@@ -21,6 +30,9 @@ class Ticket:
 
     def buyer(self):
         return self._buyer
+
+    def price(self):
+        return self._price
 
     def settle_up(self):
         if self._settled_up:
@@ -46,6 +58,8 @@ class Ticket:
         output = f'TICKET ->\n  Attendee: {self._attendee}'
 
         if self._attendee != self._buyer:
-            output += '\n  Buyer:    {self._buyer}\n  Settled up? {"y" if self._settled_up else "n"}'
+            output += f'\n  Buyer:    {self._buyer}'
+            output += '' if self._price is None else f'\n  £{round(self._price, 2)}'
+            output += f'\n  Settled up? {"y" if self._settled_up else "n"}'
 
         return output

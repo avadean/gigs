@@ -55,24 +55,29 @@ class Gig:
         attendees = [ticket.attendee() for ticket in self._tickets]
         num_attendees = len(attendees)
 
-        output = ''
+        output = 'TICKETS ->'
 
         # Create a dictionary where each buyer has a list of the attendees they've bought tickets for (including themself if so).
         buyer_to_attendee = {buyer: [ticket.attendee() for ticket in self._tickets if ticket.buyer() == buyer] for buyer in buyers}
+
+        # Order alphabetically by buyer.
+        buyer_to_attendee = dict(sorted(buyer_to_attendee.items(), key=lambda buyer_attendee: buyer_attendee[0].name()))
 
         # Reorder the attendees to place the buyer at the front for printing convenience later.
         buyer_to_attendee = {buyer: sorted(attendees_of_this_buyer,
                                            key=lambda attendee: (attendee != buyer, attendee.name())) for buyer, attendees_of_this_buyer in buyer_to_attendee.items()}
 
         for buyer, attendees_of_this_buyer in buyer_to_attendee.items():
-            output += ('{:^' + str(max(len(str(buyer)) for buyer in buyers) + 2) + '} has bought tickets for : ').format(str(buyer))
-            output += ' - '.join(map(str, attendees_of_this_buyer))
             output += '\n'
-
-        output += '\n'
+            output += '  ' + ('{:^' + str(max(len(str(buyer)) for buyer in buyers) + 2) + '} has bought tickets for : ').format(str(buyer))
+            output += ' - '.join(map(str, attendees_of_this_buyer))
 
         if not self.all_settled_up():
-            output += 'Settle ups needed ->'
+            output += '\n\nSETTLE UPS ->'
+
+            for ticket in self._tickets:
+                if not ticket.settled_up():
+                    output += f'\n  {ticket.attendee()} owes {ticket.buyer()} £{round(ticket.price()) if ticket.price() is not None else "??"} for their ticket.'
 
         return output
 
@@ -109,6 +114,10 @@ class Gig:
         assert isinstance(other, Gig)
 
         return self._key() == other._key()
+
+    def __iter__(self):
+        for ticket in self._tickets:
+            yield ticket
 
     def __str__(self):
         output = '! ' if not self.all_settled_up() else '  '
