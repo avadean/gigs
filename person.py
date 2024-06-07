@@ -5,8 +5,15 @@ class Person:
 
         self._name = name
 
+    @property
     def name(self):
         return self._name
+
+    @name.setter
+    def name(self, value):
+        assert isinstance(value, str)
+
+        self._name = value
 
     def _key(self):
         return (self._name,)

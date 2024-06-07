@@ -93,7 +93,6 @@ def load_people(file=PEOPLE_FILE):
 
 
 def load_info(file=DATA_FILE, strict=False):
-
     if Path(file).exists():
         with open(file, 'rb') as data_file:
             schedule, people = pickle_load(data_file)

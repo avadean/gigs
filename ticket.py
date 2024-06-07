@@ -25,23 +25,57 @@ class Ticket:
         self._price = price
         self._settled_up = settled_up
 
+    @property
     def attendee(self):
         return self._attendee
 
+    @attendee.setter
+    def attendee(self, value):
+        assert isinstance(value, Person)
+
+        self._attendee = value
+
+    @property
     def buyer(self):
         return self._buyer
 
+    @buyer.setter
+    def buyer(self, value):
+        assert isinstance(value, Person)
+
+        self._buyer = value
+
+    @property
     def price(self):
         return self._price
 
+    @price.setter
+    def price(self, value):
+        if value is not None:
+            assert isinstance(value, (float, int))
+
+            value = float(value)
+
+            assert value >= 0.0
+
+        self._price = value
+
     def settle_up(self):
-        if self._settled_up:
-            raise ValueErorr('Ticket already settled up.')
+        self.settled_up = True
 
-        self._settled_up = True
-
+    @property
     def settled_up(self):
         return self._settled_up
+
+    @settled_up.setter
+    def settled_up(self, value):
+        assert isinstance(value, bool)
+        print('through setter')
+
+        if value and self._settled_up:
+            raise ValueError('Ticket already settled up.')
+
+        self._settled_up = value
 
     def _key(self):
         return (self._attendee, self._buyer, self._settled_up)
@@ -53,6 +87,9 @@ class Ticket:
         assert isinstance(other, Ticket)
 
         return self._key() == other._key()
+
+    def __repr__(self):
+        return str(self._attendee)
 
     def __str__(self):
         output = f'TICKET ->\n  Attendee: {self._attendee}'

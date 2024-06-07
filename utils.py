@@ -35,3 +35,10 @@ def get_date(year=None, month=None, day=None, date=None):
 
     return _date
 
+
+def day_suffix(day):
+    assert isinstance(day, int)
+    assert 1 <= day <= 31
+
+    return {1: 'st', 2: 'nd', 3: 'rd'}.get(day % 20, 'th')
+
