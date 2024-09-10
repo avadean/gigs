@@ -55,7 +55,12 @@ class Gig:
         attendees = [ticket.attendee for ticket in self._tickets]
         num_attendees = len(attendees)
 
-        output = 'TICKETS ->'
+        date_suffix = '' if self._date is None else day_suffix(self._date.day)
+        date_output = '' if self._date is None else self._date.strftime('%a %d{date_suffix} %b %Y : ').replace('{date_suffix}', date_suffix)
+
+        name_output = ' *dummy* ' if not self._name else self._name
+
+        output = 'TICKETS -> ' + date_output + name_output
 
         # Create a dictionary where each buyer has a list of the attendees they've bought tickets for (including themself if so).
         buyer_to_attendee = {buyer: [ticket.attendee for ticket in self._tickets if ticket.buyer == buyer] for buyer in buyers}
